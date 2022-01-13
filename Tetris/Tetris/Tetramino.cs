@@ -24,16 +24,16 @@ namespace Tetris
 
         public MovableYState MovableOnY {
             get {
-                return Lowers.All(l => !Settings.Ground.Coordinates.Contains(l) && l.Y + 1 < Settings.Height)
+                return Lowers.All(l => !Settings.Ground.GetCoordinates().Contains(l) && l.Y + 1 < Settings.Height)
                     ? MovableYState.GroundUnreached
                     : MovableYState.GroundReached;
             }
         }
         public MovableXState MovableOnX {
             get {
-                if (AllCoordinates.Any(coord => Settings.Ground.Coordinates.Contains(new Coordinate((coord.X + 1, coord.Y))) || coord.X + 1 >= Settings.Width))
+                if (AllCoordinates.Any(coord => Settings.Ground.GetCoordinates().Contains(new Coordinate((coord.X + 1, coord.Y))) || coord.X + 1 >= Settings.Width))
                     return MovableXState.RightObstacle;
-                else if (AllCoordinates.Any(coord => Settings.Ground.Coordinates.Contains(new Coordinate((coord.X - 1, coord.Y))) || coord.X - 1 < 0))
+                else if (AllCoordinates.Any(coord => Settings.Ground.GetCoordinates().Contains(new Coordinate((coord.X - 1, coord.Y))) || coord.X - 1 < 0))
                     return MovableXState.LeftObstacle;
                 else
                     return MovableXState.NoObstacle;
@@ -97,7 +97,7 @@ namespace Tetris
                 item.X = x;
                 item.Y = y;
             }
-            if (!updatedCoords.Any(c => Settings.Ground.Coordinates.Contains(c) || c.Y >= Settings.Height || c.X < 0 || c.X >= Settings.Width))
+            if (!updatedCoords.Any(c => Settings.Ground.GetCoordinates().Contains(c) || c.Y >= Settings.Height || c.X < 0 || c.X >= Settings.Width))
                 AllCoordinates = updatedCoords;
         }
         public void Move(Direction dir = Direction.Down)
