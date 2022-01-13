@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace Tetris
 {
+    delegate void OnStickHandler();
     internal class Tetramino
     {
         private List<Coordinate> coordinates = new List<Coordinate>();
@@ -19,9 +20,8 @@ namespace Tetris
         public List<Coordinate> Lowers => AllCoordinates.GroupBy(c => c.X)
                                                         .Select(group => new Coordinate((group.Key, group.Max(c => c.Y))))
                                                         .ToList();
-
         public Coordinate Lowest => Lowers.OrderByDescending(c => c.Y).First();
-
+        public event OnStickHandler OnStick;
         public MovableYState MovableOnY {
             get {
                 return Lowers.All(l => !Settings.Ground.GetCoordinates().Contains(l) && l.Y + 1 < Settings.Height)
@@ -102,12 +102,23 @@ namespace Tetris
         }
         public void Move(Direction dir = Direction.Down)
         {
+            if (MovableOnY == MovableYState.GroundReached)
+            {
+                Stick(Settings.Ground);
+                return;
+            }
             if (dir == Direction.Down && MovableOnY == MovableYState.GroundUnreached)
                 AllCoordinates.ForEach(coord => coord.Y++);
             else if (dir == Direction.Left && MovableOnX != MovableXState.LeftObstacle)
                 AllCoordinates.ForEach(coord => coord.X--);
             else if (dir == Direction.Right && MovableOnX != MovableXState.RightObstacle)
                 AllCoordinates.ForEach(coord => coord.X++);
+        }
+
+        private void Stick(Ground ground)
+        {
+            ground.AddCoordinates(coordinates.ToArray());
+            OnStick?.Invoke();
         }
     }
     enum MovableXState
